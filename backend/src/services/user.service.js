@@ -1,8 +1,10 @@
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
+import { genrateUniqueReferenceId } from "../utils/user.util.js";
 
 export const createUserService = async (userData) => {
-    const user = await User.create(userData);
+    const referenceId = genrateUniqueReferenceId();
+    const user = await User.create({ ...userData, referenceId });
 
     if (!user) {
         throw new ApiError(500, "Failed to create user");

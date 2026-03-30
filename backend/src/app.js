@@ -23,6 +23,7 @@ import stateRoutes from "./routes/state.route.js";
 import pcsRoutes from "./routes/pcs.route.js";
 import acsRoutes from "./routes/acs.route.js";
 import boothsRoutes from "./routes/booths.route.js";
+import voterRoutes from "./routes/voter.route.js";
 
 app.use("/api/users", userRoutes);
 app.use("/api/officers", officerRoutes);
@@ -30,6 +31,7 @@ app.use("/api/states", stateRoutes);
 app.use("/api/pcs", pcsRoutes);
 app.use("/api/acs", acsRoutes);
 app.use("/api/booths", boothsRoutes);
+app.use("/api/voters", voterRoutes);
 
 // global error handler
 app.use((err, req, res, next) => {

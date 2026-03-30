@@ -45,3 +45,19 @@ export const createVoterService = async (aadharNumber) => {
 
     return voter;
 };
+
+export const loginVoterService = async (uniqueVoterId, password) => {
+    const voter = await Voter.findOne({ uniqueVoterId });
+
+    if (!voter) {
+        throw new ApiError(404, "Voter not found");
+    }
+
+    if (voter.password !== password) {
+        throw new ApiError(401, "Invalid credentials");
+    }
+
+    const token = voter.generateAuthToken();
+
+    return { voter, token };
+}

@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import jwt from "jsonwebtoken";
 
 const voterSchema = new Schema(
     {
@@ -156,5 +157,13 @@ const voterSchema = new Schema(
         }
     }
 );
+
+voterSchema.methods.generateAuthToken = function() {
+    return jwt.sign(
+        { _id: this._id, email: this.email, role: "voter" },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+    );
+}
 
 export const Voter = model("Voter", voterSchema);
