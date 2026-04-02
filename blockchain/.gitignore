@@ -1,0 +1,6 @@
+node_modules/
+artifacts/
+cache/
+deployment.json
+.env
+api/abi/
