@@ -58,6 +58,7 @@ export const Login = () => {
         setLoading(true)
         try {
             const response = await loginOfficer(formData)
+            const officer = response.data
             toast.success("Login successful! Redirecting...", {
                 style: {
                     background: '#fff',
@@ -72,9 +73,10 @@ export const Login = () => {
                     secondary: '#fff',
                 },
             })
-            localStorage.setItem("token", response.token)
-            localStorage.setItem("officer", JSON.stringify(response.officer))
-            setTimeout(() => navigate("/dashboard"), 800)
+            localStorage.setItem("officer", JSON.stringify(officer))
+            
+            const rolePath = officer.role.toLowerCase().replace(" ", "-")
+            setTimeout(() => navigate(`/dashboard/${rolePath}`), 800)
         } catch (error) {
             toast.error(error.message || "Invalid credentials. Please try again.", {
                 style: {

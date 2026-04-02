@@ -17,3 +17,30 @@ export const loginOfficer = async (credentials) => {
         throw new Error(error.response?.data?.message || "Failed to login");
     }
 };
+
+export const getCurrentOfficer = async () => {
+    try {
+        const response = await api.get("/officers/me");
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || "Failed to fetch officer");
+    }
+};
+
+export const getMyOfficers = async () => {
+    try {
+        const response = await api.get("/officers/my-officers");
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || "Failed to fetch officers");
+    }
+};
+
+export const getOfficersByRole = async (role) => {
+    try {
+        const response = await api.get(`/officers/role/${role}`);
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || "Failed to fetch officers");
+    }
+};

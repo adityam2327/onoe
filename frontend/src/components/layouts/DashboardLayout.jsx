@@ -1,17 +1,193 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { getCurrentOfficer } from "@/api/officer.api";
+import { User, Users, LogOut, LayoutDashboard } from "lucide-react";
+
+const roleConfig = {
+    "ECI HQ": {
+        title: "ECI HQ Dashboard",
+        createRole: "CEO",
+        color: "#000080"
+    },
+    "CEO": {
+        title: "CEO Dashboard",
+        createRole: "DEO",
+        color: "#FF9933"
+    },
+    "DEO": {
+        title: "DEO Dashboard",
+        createRole: "ERO",
+        color: "#138808"
+    },
+    "ERO": {
+        title: "ERO Dashboard",
+        createRole: "BLO",
+        color: "#FF9933"
+    },
+    "BLO": {
+        title: "BLO Dashboard",
+        createRole: null,
+        color: "#138808"
+    }
+};
 
 export const DashboardLayout = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [officer, setOfficer] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchOfficer = async () => {
+            try {
+                const response = await getCurrentOfficer();
+                setOfficer(response.data);
+            } catch (error) {
+                console.error("Failed to fetch officer:", error);
+                navigate("/login");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchOfficer();
+    }, [navigate]);
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("officer");
+        navigate("/login");
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-[#000080] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!officer) {
+        return null;
+    }
+
+    const config = roleConfig[officer.role] || roleConfig["BLO"];
+
     return (
-        <div className="min-h-screen flex flex-col">
-            <header className="bg-gray-800 text-white p-4">
-                <h1 className="text-2xl font-bold">Onoe Dashboard</h1>
-            </header>
-            <main className="flex-grow p-4">
-                <Outlet />
+        <div className="min-h-screen flex bg-background">
+            <aside className="w-64 bg-[#000080] text-white flex flex-col">
+                <div className="p-6 border-b border-white/10">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF9933] via-white to-[#138808] p-0.5">
+                            <div className="w-full h-full rounded-full bg-[#000080] flex items-center justify-center">
+                                <span className="text-white text-sm font-bold">
+                                    {officer.role.split(" ").map(w => w[0]).join("")}
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-white">{officer.name}</h3>
+                            <p className="text-xs text-white/70">{officer.role}</p>
+                        </div>
+                    </div>
+                    <p className="text-sm text-white/60">{officer.email}</p>
+                </div>
+
+                <nav className="flex-1 p-4">
+                    <ul className="space-y-2">
+                        <li>
+                            <Link
+                                to={`/dashboard/${officer.role.toLowerCase().replace(" ", "-")}`}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname === `/dashboard/${officer.role.toLowerCase().replace(" ", "-")}`
+                                        ? "bg-white/20 text-white"
+                                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                                }`}
+                            >
+                                <LayoutDashboard className="w-5 h-5" />
+                                Dashboard
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                to="/dashboard/officers"
+                                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                                    location.pathname === "/dashboard/officers"
+                                        ? "bg-white/20 text-white"
+                                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                                }`}
+                            >
+                                <Users className="w-5 h-5" />
+                                My Officers
+                            </Link>
+                        </li>
+                        {config.createRole && (
+                            <li>
+                                <Link
+                                    to="/dashboard/create-officer"
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                                        location.pathname === "/dashboard/create-officer"
+                                            ? "bg-white/20 text-white"
+                                            : "text-white/80 hover:bg-white/10 hover:text-white"
+                                    }`}
+                                >
+                                    <User className="w-5 h-5" />
+                                    Create {config.createRole}
+                                </Link>
+                            </li>
+                        )}
+                    </ul>
+                </nav>
+
+                <div className="p-4 border-t border-white/10">
+                    <div className="flex items-center justify-center gap-3 mb-4">
+                        <div className="w-6 h-1.5 rounded-full bg-[#FF9933]"></div>
+                        <div className="w-6 h-1.5 rounded-full bg-white"></div>
+                        <div className="w-6 h-1.5 rounded-full bg-[#138808]"></div>
+                    </div>
+                    <Button
+                        onClick={handleLogout}
+                        variant="ghost"
+                        className="w-full justify-start gap-3 text-white/80 hover:text-white hover:bg-white/10"
+                    >
+                        <LogOut className="w-5 h-5" />
+                        Logout
+                    </Button>
+                </div>
+            </aside>
+
+            <main className="flex-1 flex flex-col">
+                <header className="bg-white border-b-2 border-[#FF9933] px-8 py-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-2xl font-bold text-[#000080]">{config.title}</h1>
+                            <p className="text-sm text-gray-500">Welcome back, {officer.name}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-[#138808]"></div>
+                            <span className="text-sm text-gray-600">Online</span>
+                        </div>
+                    </div>
+                </header>
+
+                <div className="flex-1 p-8 overflow-auto">
+                    <Outlet />
+                </div>
+
+                <footer className="bg-white border-t border-gray-200 px-8 py-4">
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-1.5 rounded-full bg-[#FF9933]"></div>
+                            <div className="w-4 h-1.5 rounded-full bg-white border border-gray-200"></div>
+                            <div className="w-4 h-1.5 rounded-full bg-[#138808]"></div>
+                        </div>
+                        <p>&copy; 2024 ONOE. All rights reserved.</p>
+                    </div>
+                </footer>
             </main>
-            <footer className="bg-gray-800 text-white p-4 text-center">
-                <p>&copy; 2024 Onoe. All rights reserved.</p>
-            </footer>
         </div>
     );
-}
+};
