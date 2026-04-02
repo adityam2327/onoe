@@ -14,3 +14,8 @@ export const getPCSService = async (state_code) => {
 
     return pcsList;
 }
+
+export const getAllPCSService = async () => {
+    const pcsList = await mongoose.connection.db.collection("pcs").find({}).toArray();
+    return pcsList;
+}

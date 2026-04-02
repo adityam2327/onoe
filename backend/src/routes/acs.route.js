@@ -1,8 +1,9 @@
 import express from "express";
-import { getACSByPCCode } from "../controllers/acs.controller.js";
+import { getACSByPCCode, getAllACS } from "../controllers/acs.controller.js";
 
 const router = express.Router();
 
+router.get("/all", getAllACS);
 router.get("/:pc_code", getACSByPCCode);
 
 export default router;

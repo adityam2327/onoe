@@ -7,6 +7,7 @@ import { Login } from "../pages/auth/Login";
 import { MyOfficers } from "../dashboard/MyOfficers";
 import { CreateOfficer } from "../dashboard/CreateOfficer";
 import { AllVoters } from "../dashboard/AllVoters";
+import { AllBooths } from "../dashboard/AllBooths";
 import { ECIDashboard } from "../dashboard/ECI_HQ/ECIDashboard";
 import { ProtectedRoutes } from "../components/gaurds/ProtectedRoutes";
 import { CEODashboard } from "../dashboard/CEO/CEODashboard";
@@ -77,6 +78,10 @@ export const appRoutes = createBrowserRouter([
                     {
                         path: "voters",
                         element: <AllVoters />
+                    },
+                    {
+                        path: "booths",
+                        element: <AllBooths />
                     }
                 ]
             }
