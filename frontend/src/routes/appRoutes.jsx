@@ -8,6 +8,10 @@ import { MyOfficers } from "../dashboard/MyOfficers";
 import { CreateOfficer } from "../dashboard/CreateOfficer";
 import { AllVoters } from "../dashboard/AllVoters";
 import { AllBooths } from "../dashboard/AllBooths";
+import { AllPCS } from "../dashboard/AllPCS";
+import { AllACS } from "../dashboard/AllACS";
+import { AllMobilityBooths } from "../dashboard/AllMobilityBooths";
+import { AllStates } from "../dashboard/AllStates";
 import { ECIDashboard } from "../dashboard/ECI_HQ/ECIDashboard";
 import { ProtectedRoutes } from "../components/gaurds/ProtectedRoutes";
 import { CEODashboard } from "../dashboard/CEO/CEODashboard";
@@ -82,6 +86,22 @@ export const appRoutes = createBrowserRouter([
                     {
                         path: "booths",
                         element: <AllBooths />
+                    },
+                    {
+                        path: "mobility-booths",
+                        element: <AllMobilityBooths />
+                    },
+                    {
+                        path: "pcs",
+                        element: <AllPCS />
+                    },
+                    {
+                        path: "acs",
+                        element: <AllACS />
+                    },
+                    {
+                        path: "states",
+                        element: <AllStates />
                     }
                 ]
             }

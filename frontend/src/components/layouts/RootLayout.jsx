@@ -38,7 +38,7 @@ export const RootLayout = () => {
                         </div>
                         <span className="font-semibold">One Nation One Election</span>
                     </div>
-                    <p className="text-sm text-white/70">&copy; 2024 ONOE. All rights reserved.</p>
+
                 </div>
             </footer>
         </div>

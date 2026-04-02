@@ -176,6 +176,66 @@ export const DashboardLayout = () => {
                                 </Link>
                             </li>
                         )}
+                        {officer.role === "ECI HQ" && (
+                            <li>
+                                <Link
+                                    to="/dashboard/mobility-booths"
+                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
+                                        location.pathname === "/dashboard/mobility-booths"
+                                            ? "bg-white/20 text-white"
+                                            : "text-white/80 hover:bg-white/10 hover:text-white"
+                                    }`}
+                                >
+                                    <Building2 className="w-5 h-5" />
+                                    Mobility Booths
+                                </Link>
+                            </li>
+                        )}
+                        {officer.role === "ECI HQ" && (
+                            <li>
+                                <Link
+                                    to="/dashboard/pcs"
+                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
+                                        location.pathname === "/dashboard/pcs"
+                                            ? "bg-white/20 text-white"
+                                            : "text-white/80 hover:bg-white/10 hover:text-white"
+                                    }`}
+                                >
+                                    <Building2 className="w-5 h-5" />
+                                    Parliamentary Constituencies
+                                </Link>
+                            </li>
+                        )}
+                        {officer.role === "ECI HQ" && (
+                            <li>
+                                <Link
+                                    to="/dashboard/acs"
+                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
+                                        location.pathname === "/dashboard/acs"
+                                            ? "bg-white/20 text-white"
+                                            : "text-white/80 hover:bg-white/10 hover:text-white"
+                                    }`}
+                                >
+                                    <Building2 className="w-5 h-5" />
+                                    Assembly Constituencies
+                                </Link>
+                            </li>
+                        )}
+                        {officer.role === "ECI HQ" && (
+                            <li>
+                                <Link
+                                    to="/dashboard/states"
+                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
+                                        location.pathname === "/dashboard/states"
+                                            ? "bg-white/20 text-white"
+                                            : "text-white/80 hover:bg-white/10 hover:text-white"
+                                    }`}
+                                >
+                                    <Building2 className="w-5 h-5" />
+                                    States
+                                </Link>
+                            </li>
+                        )}
                     </ul>
                 </nav>
 
@@ -221,7 +281,7 @@ export const DashboardLayout = () => {
                             <div className="w-4 h-1.5 rounded-full bg-white border border-gray-200"></div>
                             <div className="w-4 h-1.5 rounded-full bg-[#138808]"></div>
                         </div>
-                        <p>&copy; 2024 ONOE. All rights reserved.</p>
+
                     </div>
                 </footer>
             </main>
