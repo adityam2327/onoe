@@ -73,8 +73,6 @@ export const Login = () => {
                     secondary: '#fff',
                 },
             })
-            localStorage.setItem("officer", JSON.stringify(officer))
-            
             const rolePath = officer.role.toLowerCase().replace(" ", "-")
             setTimeout(() => navigate(`/dashboard/${rolePath}`), 800)
         } catch (error) {

@@ -54,8 +54,6 @@ export const DashboardLayout = () => {
     }, [navigate]);
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("officer");
         navigate("/login");
     };
 
@@ -79,29 +77,38 @@ export const DashboardLayout = () => {
     return (
         <div className="min-h-screen flex bg-background">
             <aside className="w-64 bg-[#000080] text-white flex flex-col">
-                <div className="p-6 border-b border-white/10">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF9933] via-white to-[#138808] p-0.5">
+                <div className="p-4 border-b border-white/10">
+                    <Link to="/" className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF9933] via-white to-[#138808] p-0.5">
                             <div className="w-full h-full rounded-full bg-[#000080] flex items-center justify-center">
-                                <span className="text-white text-sm font-bold">
-                                    {officer.role.split(" ").map(w => w[0]).join("")}
-                                </span>
+                                <span className="text-white text-xs font-bold">ONOE</span>
                             </div>
                         </div>
+                        <span className="text-lg font-bold">ONOE</span>
+                    </Link>
+                </div>
+
+                <div className="p-4 border-b border-white/10">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF9933] to-[#138808] flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">
+                                {officer.name.charAt(0).toUpperCase()}
+                            </span>
+                        </div>
                         <div>
-                            <h3 className="font-semibold text-white">{officer.name}</h3>
+                            <h3 className="font-semibold text-white text-sm">{officer.name}</h3>
                             <p className="text-xs text-white/70">{officer.role}</p>
                         </div>
                     </div>
-                    <p className="text-sm text-white/60">{officer.email}</p>
+                    <p className="text-xs text-white/60 truncate">{officer.email}</p>
                 </div>
 
                 <nav className="flex-1 p-4">
-                    <ul className="space-y-2">
+                    <ul className="space-y-1">
                         <li>
                             <Link
                                 to={`/dashboard/${officer.role.toLowerCase().replace(" ", "-")}`}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
                                     location.pathname === `/dashboard/${officer.role.toLowerCase().replace(" ", "-")}`
                                         ? "bg-white/20 text-white"
                                         : "text-white/80 hover:bg-white/10 hover:text-white"
@@ -114,7 +121,7 @@ export const DashboardLayout = () => {
                         <li>
                             <Link
                                 to="/dashboard/officers"
-                                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
                                     location.pathname === "/dashboard/officers"
                                         ? "bg-white/20 text-white"
                                         : "text-white/80 hover:bg-white/10 hover:text-white"
@@ -128,7 +135,7 @@ export const DashboardLayout = () => {
                             <li>
                                 <Link
                                     to="/dashboard/create-officer"
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
                                         location.pathname === "/dashboard/create-officer"
                                             ? "bg-white/20 text-white"
                                             : "text-white/80 hover:bg-white/10 hover:text-white"
@@ -143,10 +150,10 @@ export const DashboardLayout = () => {
                 </nav>
 
                 <div className="p-4 border-t border-white/10">
-                    <div className="flex items-center justify-center gap-3 mb-4">
-                        <div className="w-6 h-1.5 rounded-full bg-[#FF9933]"></div>
-                        <div className="w-6 h-1.5 rounded-full bg-white"></div>
-                        <div className="w-6 h-1.5 rounded-full bg-[#138808]"></div>
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                        <div className="w-5 h-1.5 rounded-full bg-[#FF9933]"></div>
+                        <div className="w-5 h-1.5 rounded-full bg-white"></div>
+                        <div className="w-5 h-1.5 rounded-full bg-[#138808]"></div>
                     </div>
                     <Button
                         onClick={handleLogout}
