@@ -1,19 +1,14 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { createOfficerService, loginOfficerService} from "../services/officer.service.js";
-import { Officer } from "../models/officer.model.js";
+import { createOfficerService, loginOfficerService, getOfficersByRoleService, getMyOfficersService } from "../services/officer.service.js";
 
 export const createOfficer = asyncHandler(async (req, res) => {
-    const officerData = req.body;
-    const newOfficer = await Officer.create(officerData);
+    const currentOfficer = req.officer;
+    const newOfficerData = req.body;
+
+    const newOfficer = await createOfficerService(currentOfficer, newOfficerData);
 
     return res.status(201).json(new ApiResponse(201, "Officer created successfully", newOfficer));
-    // const currentOfficer = req.officer;
-    // const newOfficerData = req.body;
-
-    // const newOfficer = await createOfficerService(currentOfficer, newOfficerData);
-
-    // return res.status(201).json(new ApiResponse(201, "Officer created successfully", newOfficer));
 });
 
 export const loginOfficer = asyncHandler(async (req, res) => {
@@ -25,8 +20,27 @@ export const loginOfficer = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 24 * 60 * 60 * 1000 // 1 day
+        maxAge: 24 * 60 * 60 * 1000
     });
 
     return res.status(200).json(new ApiResponse(200, "Login successful", officer));
+});
+
+export const getOfficersByRole = asyncHandler(async (req, res) => {
+    const { role } = req.params;
+    const officers = await getOfficersByRoleService(role);
+
+    return res.status(200).json(new ApiResponse(200, "Officers fetched successfully", officers));
+});
+
+export const getMyOfficers = asyncHandler(async (req, res) => {
+    const currentOfficer = req.officer;
+    const officers = await getMyOfficersService(currentOfficer);
+
+    return res.status(200).json(new ApiResponse(200, "Officers fetched successfully", officers));
+});
+
+export const getCurrentOfficer = asyncHandler(async (req, res) => {
+    const officer = req.officer;
+    return res.status(200).json(new ApiResponse(200, "Officer fetched successfully", officer));
 });

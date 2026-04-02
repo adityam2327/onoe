@@ -3,18 +3,32 @@ import { ApiError } from "../utils/ApiError.js";
 
 export const createOfficerService = async (currentOfficerData, newOfficerData) => {
     const { role: currentRole } = currentOfficerData;
-    const { role: newRole } = newOfficerData;
 
-    let officer;
+    const roleHierarchy = {
+        "ECI HQ": "CEO",
+        "CEO": "DEO",
+        "DEO": "ERO",
+        "ERO": "BLO"
+    };
 
-    if ((currentRole === "ECI HQ" && newRole === "CEO") ||
-        (currentRole === "CEO" && newRole === "DEO") ||
-        (currentRole === "DEO" && newRole === "ERO") ||
-        (currentRole === "ERO" && newRole === "BLO")) {
-        officer = await Officer.create(newOfficerData);
-    } else {
-        throw new ApiError(403, "Forbidden: You don't have permission to create this officer");
+    const allowedRole = roleHierarchy[currentRole];
+
+    if (!allowedRole) {
+        throw new ApiError(403, "You don't have permission to create officers");
     }
+
+    const { role: newRole, ...otherData } = newOfficerData;
+
+    if (newRole && newRole !== allowedRole) {
+        throw new ApiError(400, `You can only create ${allowedRole} officers`);
+    }
+
+    const officerData = {
+        ...otherData,
+        role: allowedRole
+    };
+
+    const officer = await Officer.create(officerData);
 
     return officer;
 }
@@ -33,4 +47,29 @@ export const loginOfficerService = async (email, password, role) => {
     const token = officer.generateAuthToken();
     
     return { officer, token };
+}
+
+export const getOfficersByRoleService = async (role) => {
+    const officers = await Officer.find({ role: role.toUpperCase() }).select("-password");
+    return officers;
+}
+
+export const getMyOfficersService = async (currentOfficer) => {
+    const { role } = currentOfficer;
+
+    const roleHierarchy = {
+        "ECI HQ": "CEO",
+        "CEO": "DEO",
+        "DEO": "ERO",
+        "ERO": "BLO"
+    };
+
+    const childRole = roleHierarchy[role];
+
+    if (!childRole) {
+        return [];
+    }
+
+    const officers = await Officer.find({ role: childRole }).select("-password");
+    return officers;
 }

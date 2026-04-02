@@ -35,24 +35,24 @@ const officerSchema = new Schema(
             trim: true,
             minlength: 10,
             maxlength: 10,
-            required: true
+            // required: true
         },
         postingAddress: {
             state: {
                 type: String,
-                required: true
+                // required: true
             },
             district: {
                 type: String,
-                required: true
+                // required: true
             },
             assembley: {
                 type: String,
-                required: true
+                // required: true
             },
             consituency: {
                 type: String,
-                required: true
+                // required: true
             },
         },
     },
