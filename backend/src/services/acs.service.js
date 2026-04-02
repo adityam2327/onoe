@@ -14,3 +14,8 @@ export const getACSByPCCodeService = async (pc_code) => {
 
     return acs;
 }
+
+export const getAllACSService = async () => {
+    const acs = await mongoose.connection.db.collection("acs").find({}).toArray();
+    return acs;
+}
