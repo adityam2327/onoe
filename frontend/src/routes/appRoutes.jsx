@@ -18,6 +18,7 @@ import { CEODashboard } from "../dashboard/CEO/CEODashboard";
 import { DEODashboard } from "../dashboard/DEO/DEODashboard";
 import { ERODashboard } from "../dashboard/ERO/ERODashboard";
 import { BLODashboard } from "../dashboard/BLO/BLODashboard";
+import { VerifyVoters } from "../dashboard/VerifyVoters";
 
 export const appRoutes = createBrowserRouter([
     {
@@ -67,6 +68,10 @@ export const appRoutes = createBrowserRouter([
             {
                 path: "blo",
                 element: <BLODashboard />
+            },
+            {
+                path: "verify-voters",
+                element: <VerifyVoters />
             },
             {
                 path: "officers",

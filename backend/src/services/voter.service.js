@@ -84,3 +84,11 @@ export const getAllVotersService = async (page = 1, limit = 10, filter = {}) => 
         }
     };
 };
+
+export const checkVoterAndUserViaAadharService = async (aadharNumber) => {
+    // check are user or voter exists with this aadhar number and tell where it exists
+    const user = await User.findOne({ aadharNumber });
+    const voter = await Voter.findOne({ aadharNumber });
+    
+    return { user, voter };
+}   
