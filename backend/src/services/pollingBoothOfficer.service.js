@@ -36,7 +36,7 @@ export const createPollingBoothOfficerService = async (eroOfficer, officerData) 
 };
 
 export const loginPollingBoothOfficerService = async (email, password) => {
-    const officer = await PollingBoothOfficer.findOne({ email });
+    const officer = await PollingBoothOfficer.findOne({ email }).populate("booth");
 
     if (!officer) {
         throw new ApiError(401, "Invalid credentials");
