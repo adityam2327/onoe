@@ -6,6 +6,6 @@ const router = express.Router();
 router.post("/login", loginVoter);
 router.get("/all", getAllVoters);
 router.get("/check-aadhar", checkVoterAndUserViaAadhar);
-router.get("/by-booth/:boothId", getVotersByBoothId);
+router.get("/by-booth", getVotersByBoothId);
 
 export default router;
