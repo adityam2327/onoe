@@ -109,8 +109,7 @@ export const getVotersByBoothIdService = async (boothId) => {
 };
 
 export const assignMobilityBoothService = async (voterId, boothId) => {
-    const voter = await Voter.findById(voterId);
-
+    const voter = await Voter.findOne({ uniqueVoterId: voterId });
     if (!voter) {
         throw new ApiError(404, "Voter not found");
     }
