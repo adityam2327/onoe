@@ -44,7 +44,7 @@ app.use("/api/voters", voterRoutes);
 // global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ success: false, message: "An unexpected error occurred" });
+  res.status(500).json({ success: false, message: err.message || "Invalid request" });
 });
 
 app.use((_, res) => {
