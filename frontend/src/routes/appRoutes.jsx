@@ -19,6 +19,7 @@ import { DEODashboard } from "../dashboard/DEO/DEODashboard";
 import { ERODashboard } from "../dashboard/ERO/ERODashboard";
 import { BLODashboard } from "../dashboard/BLO/BLODashboard";
 import { VerifyVoters } from "../dashboard/VerifyVoters";
+import { CreatePollingBoothOfficer } from "../dashboard/CreatePollingBoothOfficer";
 
 export const appRoutes = createBrowserRouter([
     {
@@ -80,6 +81,10 @@ export const appRoutes = createBrowserRouter([
             {
                 path: "create-officer",
                 element: <CreateOfficer />
+            },
+            {
+                path: "create-polling-booth-officer",
+                element: <CreatePollingBoothOfficer />
             },
             {
                 element: <ProtectedRoutes allowedRoles={["ECI HQ"]} />,

@@ -1,6 +1,6 @@
 import { PollingBoothOfficer } from "../models/polling_booth_officer.model.js";
 import { Booths } from "../models/booths.model.js";
-import { MobilityBooths } from "../models/mobility_booths.model.js";
+import mongoose from "mongoose";
 import { ApiError } from "../utils/ApiError.js";
 
 export const createPollingBoothOfficerService = async (eroOfficer, officerData) => {
@@ -15,7 +15,7 @@ export const createPollingBoothOfficerService = async (eroOfficer, officerData) 
             throw new ApiError(404, "Booth not found");
         }
     } else if (assignmentType === "mobility_booth" && mobilityBoothId) {
-        mobilityBooth = await MobilityBooths.findById(mobilityBoothId);
+        mobilityBooth = await mongoose.connection.db.collection("mobility_booths").findOne({ _id: new mongoose.Types.ObjectId(mobilityBoothId) });
         if (!mobilityBooth) {
             throw new ApiError(404, "Mobility booth not found");
         }
@@ -54,8 +54,15 @@ export const loginPollingBoothOfficerService = async (email, password) => {
 export const getPollingBoothOfficersByERO = async (eroOfficer) => {
     const officers = await PollingBoothOfficer.find({ ero: eroOfficer._id })
         .select("-password")
-        .populate("booth")
-        .populate("mobilityBooth");
+        .populate("booth");
+    
+    for (const officer of officers) {
+        if (officer.mobilityBooth) {
+            const mobilityBooth = await mongoose.connection.db.collection("mobility_booths").findOne({ _id: new mongoose.Types.ObjectId(officer.mobilityBooth) });
+            officer._doc.mobilityBooth = mobilityBooth;
+        }
+    }
+    
     return officers;
 };
 
@@ -65,7 +72,7 @@ export const getAllBooths = async () => {
 };
 
 export const getAllMobilityBooths = async () => {
-    const mobilityBooths = await MobilityBooths.find().select("boothId boothName areaName");
+    const mobilityBooths = await mongoose.connection.db.collection("mobility_booths").find({}).toArray();
     return mobilityBooths;
 };
 
@@ -95,7 +102,7 @@ export const assignMobilityBoothToOfficerService = async (officerId, mobilityBoo
         throw new ApiError(404, "Officer not found");
     }
 
-    const mobilityBooth = await MobilityBooths.findById(mobilityBoothId);
+    const mobilityBooth = await mongoose.connection.db.collection("mobility_booths").findOne({ _id: new mongoose.Types.ObjectId(mobilityBoothId) });
     if (!mobilityBooth) {
         throw new ApiError(404, "Mobility booth not found");
     }
