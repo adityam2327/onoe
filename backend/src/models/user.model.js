@@ -56,6 +56,14 @@ const userSchema = new Schema(
                 minlength: 3,
                 maxlength: 50,
                 // required: true
+            },
+            aadharNumber: {
+                type: String,
+                trim: true,
+                minlength: 12,
+                maxlength: 12,
+                // unique: true,
+                // required: true
             }
         },
 

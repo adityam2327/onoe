@@ -61,6 +61,19 @@ export const createUserService = async (userData) => {
         { level: "AI", status: "pending", remarks: "Verification in progress", verifiedAt: null }
     ];
 
+    // check if user with aadhar number, phone number or email already exists
+    const existingUser = await User.findOne({
+        $or: [
+            { aadharNumber: userData.aadharNumber },
+            { phoneNumber: userData.phoneNumber },
+            { email: userData.email }
+        ]
+    });
+    
+    if (existingUser) {
+        throw new ApiError(400, "User with same Aadhar number, phone number or email already exists");
+    }
+
     const user = await User.create({ ...userData, referenceId, verification });
 
     if (!user) {
