@@ -44,3 +44,12 @@ export const getOfficersByRole = async (role) => {
         throw new Error(error.response?.data?.message || "Failed to fetch officers");
     }
 };
+
+export const getECIStats = async () => {
+    try {
+        const response = await api.get("/dashboard/eci-stats");
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || "Failed to fetch stats");
+    }
+};

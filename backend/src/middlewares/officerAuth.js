@@ -10,7 +10,7 @@ export const authenticateOfficer = async (req, res, next) => {
         }
 
         const decode = jwt.verify(token, process.env.JWT_SECRET);
-        const officer = await Officer.findById(decode.id);
+        const officer = await Officer.findById(decode._id);
 
         if (!officer) {
             return res.status(401).json({ error: "Unauthorized: Officer not found" });

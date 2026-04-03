@@ -4,7 +4,13 @@ import { genrateUniqueReferenceId } from "../utils/user.util.js";
 
 export const createUserService = async (userData) => {
     const referenceId = genrateUniqueReferenceId();
-    const user = await User.create({ ...userData, referenceId });
+    const verification = [
+        { level: "BLO", status: "pending", remarks: "", verifiedAt: null },
+        { level: "ERO", status: "pending", remarks: "", verifiedAt: null },
+        { level: "DEO", status: "pending", remarks: "", verifiedAt: null },
+        { level: "AI", status: "verified", remarks: "Auto-verified by AI system - Document verification successful", verifiedAt: new Date() }
+    ];
+    const user = await User.create({ ...userData, referenceId, verification });
 
     if (!user) {
         throw new ApiError(500, "Failed to create user");

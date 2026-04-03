@@ -5,7 +5,7 @@ import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
-import { getAllBooths, createBooth, updateBooth, deleteBooth, getStates, getAllPCS, getAllACS } from "@/api/booths.api";
+import { getAllBooths, createBooth, updateBooth, deleteBooth, getStatesList, getAllPCsList, getAllACsList } from "@/api/booths.api";
 import { Building2, RefreshCw, ChevronLeft, ChevronRight, X, Plus, Pencil, Trash2, MapPin, Hash } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -44,7 +44,7 @@ export const AllBooths = () => {
         setDataLoading(true);
         try {
             const [statesRes, pcsRes, acsRes] = await Promise.all([
-                getStates(), getAllPCS(), getAllACS()
+                getStatesList(), getAllPCsList(), getAllACsList()
             ]);
             const rawStates = statesRes.data || [];
             const rawPCs = pcsRes.data || [];

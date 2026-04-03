@@ -8,12 +8,19 @@ import { MyOfficers } from "../dashboard/MyOfficers";
 import { CreateOfficer } from "../dashboard/CreateOfficer";
 import { AllVoters } from "../dashboard/AllVoters";
 import { AllBooths } from "../dashboard/AllBooths";
+import { AllPCS } from "../dashboard/AllPCS";
+import { AllACS } from "../dashboard/AllACS";
+import { AllMobilityBooths } from "../dashboard/AllMobilityBooths";
+import { AllStates } from "../dashboard/AllStates";
 import { ECIDashboard } from "../dashboard/ECI_HQ/ECIDashboard";
 import { ProtectedRoutes } from "../components/gaurds/ProtectedRoutes";
 import { CEODashboard } from "../dashboard/CEO/CEODashboard";
 import { DEODashboard } from "../dashboard/DEO/DEODashboard";
 import { ERODashboard } from "../dashboard/ERO/ERODashboard";
 import { BLODashboard } from "../dashboard/BLO/BLODashboard";
+import { VerifyVoters } from "../dashboard/VerifyVoters";
+import { MobilityVerification } from "../dashboard/MobilityVerification";
+import { CreatePollingBoothOfficer } from "../dashboard/CreatePollingBoothOfficer";
 
 export const appRoutes = createBrowserRouter([
     {
@@ -65,12 +72,24 @@ export const appRoutes = createBrowserRouter([
                 element: <BLODashboard />
             },
             {
+                path: "verify-voters",
+                element: <VerifyVoters />
+            },
+            {
+                path: "mobility-verification",
+                element: <MobilityVerification />
+            },
+            {
                 path: "officers",
                 element: <MyOfficers />
             },
             {
                 path: "create-officer",
                 element: <CreateOfficer />
+            },
+            {
+                path: "create-polling-booth-officer",
+                element: <CreatePollingBoothOfficer />
             },
             {
                 element: <ProtectedRoutes allowedRoles={["ECI HQ"]} />,
@@ -82,6 +101,22 @@ export const appRoutes = createBrowserRouter([
                     {
                         path: "booths",
                         element: <AllBooths />
+                    },
+                    {
+                        path: "mobility-booths",
+                        element: <AllMobilityBooths />
+                    },
+                    {
+                        path: "pcs",
+                        element: <AllPCS />
+                    },
+                    {
+                        path: "acs",
+                        element: <AllACS />
+                    },
+                    {
+                        path: "states",
+                        element: <AllStates />
                     }
                 ]
             }

@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:5173", // Adjust this to your frontend URL
+  origin: "http://localhost:5173",
   credentials: true,
 };
 
@@ -25,10 +25,16 @@ import acsRoutes from "./routes/acs.route.js";
 import boothsRoutes from "./routes/booths.route.js";
 import voterRoutes from "./routes/voter.route.js";
 import mobilityBoothsRoutes from "./routes/mobility_booths.route.js";
+import dashboardRoutes from "./routes/dashboard.route.js";
+import officerDashboardRoutes from "./routes/officerDashboard.route.js";
+import pollingBoothOfficerRoutes from "./routes/pollingBoothOfficer.route.js";
 
 app.use("/api/mobility-booths", mobilityBoothsRoutes);
+app.use("/api/polling-booth-officers", pollingBoothOfficerRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/officers", officerRoutes);
+app.use("/api/officer-dashboard", officerDashboardRoutes);
 app.use("/api/states", stateRoutes);
 app.use("/api/pcs", pcsRoutes);
 app.use("/api/acs", acsRoutes);

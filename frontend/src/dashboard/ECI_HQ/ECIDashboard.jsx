@@ -1,15 +1,22 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, UserPlus, Building2, MapPin, BarChart3, Settings, RefreshCw, UserCheck } from "lucide-react";
+import { Users, UserPlus, Building2, MapPin, BarChart3, Settings, RefreshCw, UserCheck, Truck } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getCurrentOfficer, getMyOfficers } from "@/api/officer.api";
+import { getCurrentOfficer, getECIStats } from "@/api/officer.api";
 import { Link } from "react-router-dom";
 
 export const ECIDashboard = () => {
     const [officer, setOfficer] = useState(null);
     const [stats, setStats] = useState({
+        voters: 0,
         ceos: 0,
-        totalOfficers: 0
+        deos: 0,
+        blos: 0,
+        states: 0,
+        pcs: 0,
+        acs: 0,
+        booths: 0,
+        mobilityBooths: 0
     });
     const [loading, setLoading] = useState(true);
 
@@ -19,11 +26,8 @@ export const ECIDashboard = () => {
                 const officerRes = await getCurrentOfficer();
                 setOfficer(officerRes.data);
                 
-                const ceosRes = await getMyOfficers();
-                setStats({
-                    ceos: ceosRes.data.length,
-                    totalOfficers: ceosRes.data.length
-                });
+                const statsRes = await getECIStats();
+                setStats(statsRes.data);
             } catch (error) {
                 console.error("Failed to fetch data:", error);
             } finally {
@@ -57,8 +61,19 @@ export const ECIDashboard = () => {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="border-l-4 border-l-[#FF9933]">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-600">Total Voters</CardTitle>
+                        <Users className="h-4 w-4 text-[#FF9933]" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-[#000080]">{stats.voters.toLocaleString()}</div>
+                        <p className="text-xs text-gray-500">Registered voters</p>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-[#138808]">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-gray-600">Total CEOs</CardTitle>
-                        <Building2 className="h-4 w-4 text-[#FF9933]" />
+                        <Building2 className="h-4 w-4 text-[#138808]" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-[#000080]">{stats.ceos}</div>
@@ -66,36 +81,84 @@ export const ECIDashboard = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-[#138808]">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600">Total Officers</CardTitle>
-                        <Users className="h-4 w-4 text-[#138808]" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-[#000080]">{stats.totalOfficers}</div>
-                        <p className="text-xs text-gray-500">All hierarchical officers</p>
-                    </CardContent>
-                </Card>
-
                 <Card className="border-l-4 border-l-[#000080]">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600">States Covered</CardTitle>
-                        <MapPin className="h-4 w-4 text-[#000080]" />
+                        <CardTitle className="text-sm font-medium text-gray-600">Total DEOs</CardTitle>
+                        <UserCheck className="h-4 w-4 text-[#000080]" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-[#000080]">28</div>
-                        <p className="text-xs text-gray-500">States & UTs</p>
+                        <div className="text-2xl font-bold text-[#000080]">{stats.deos}</div>
+                        <p className="text-xs text-gray-500">District Election Officers</p>
                     </CardContent>
                 </Card>
 
                 <Card className="border-l-4 border-l-[#FF9933]">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600">Reports</CardTitle>
-                        <BarChart3 className="h-4 w-4 text-[#FF9933]" />
+                        <CardTitle className="text-sm font-medium text-gray-600">Total BLOs</CardTitle>
+                        <Users className="h-4 w-4 text-[#FF9933]" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-[#000080]">0</div>
-                        <p className="text-xs text-gray-500">Pending reports</p>
+                        <div className="text-2xl font-bold text-[#000080]">{stats.blos}</div>
+                        <p className="text-xs text-gray-500">Booth Level Officers</p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <Card className="border-l-4 border-l-[#138808]">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-600">States</CardTitle>
+                        <MapPin className="h-4 w-4 text-[#138808]" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-[#000080]">{stats.states}</div>
+                        <p className="text-xs text-gray-500">States & UTs</p>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-[#000080]">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-600">Parliamentary Constituencies</CardTitle>
+                        <Building2 className="h-4 w-4 text-[#000080]" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-[#000080]">{stats.pcs}</div>
+                        <p className="text-xs text-gray-500">PCs</p>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-[#FF9933]">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-600">Assembly Constituencies</CardTitle>
+                        <Building2 className="h-4 w-4 text-[#FF9933]" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-[#000080]">{stats.acs}</div>
+                        <p className="text-xs text-gray-500">ACs</p>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-[#138808]">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-600">Total Booths</CardTitle>
+                        <Building2 className="h-4 w-4 text-[#138808]" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-[#000080]">{stats.booths.toLocaleString()}</div>
+                        <p className="text-xs text-gray-500">Polling Booths</p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <Card className="border-l-4 border-l-[#000080]">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-600">Mobility Booths</CardTitle>
+                        <Truck className="h-4 w-4 text-[#000080]" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-[#000080]">{stats.mobilityBooths}</div>
+                        <p className="text-xs text-gray-500">Mobile Booths</p>
                     </CardContent>
                 </Card>
             </div>

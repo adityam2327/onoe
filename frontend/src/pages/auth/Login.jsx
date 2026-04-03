@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { loginOfficer } from "@/api/officer.api"
+import { loginPollingBoothOfficer } from "@/api/pollingBoothOfficer.api"
 
 const ROLES = [
     { value: "BLO", label: "Booth Level Officer (BLO)" },
@@ -13,6 +14,7 @@ const ROLES = [
     { value: "DEO", label: "District Election Officer (DEO)" },
     { value: "CEO", label: "Chief Election Officer (CEO)" },
     { value: "ECI HQ", label: "Election Commission India HQ" },
+    { value: "POLLING_BOOTH_OFFICER", label: "Polling Booth Officer" },
 ]
 
 export const Login = () => {
@@ -57,7 +59,12 @@ export const Login = () => {
 
         setLoading(true)
         try {
-            const response = await loginOfficer(formData)
+            let response;
+            if (formData.role === "POLLING_BOOTH_OFFICER") {
+                response = await loginPollingBoothOfficer({ email: formData.email, password: formData.password });
+            } else {
+                response = await loginOfficer(formData);
+            }
             const officer = response.data
             toast.success("Login successful! Redirecting...", {
                 style: {
@@ -73,7 +80,7 @@ export const Login = () => {
                     secondary: '#fff',
                 },
             })
-            const rolePath = officer.role.toLowerCase().replace(" ", "-")
+            const rolePath = officer.role ? officer.role.toLowerCase().replace(" ", "-") : "polling-booth-officer"
             setTimeout(() => navigate(`/dashboard/${rolePath}`), 800)
         } catch (error) {
             toast.error(error.message || "Invalid credentials. Please try again.", {

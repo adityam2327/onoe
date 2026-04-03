@@ -55,4 +55,4 @@ const mobilityBoothsSchema = new Schema(
 
 mobilityBoothsSchema.index({ location: "2dsphere" });
 
-export const MobilityBooths = model("MobilityBooths", mobilityBoothsSchema);
+export const MobilityBooths = model("mobility_booths", mobilityBoothsSchema);

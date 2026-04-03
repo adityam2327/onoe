@@ -152,3 +152,7 @@ export const deleteBoothService = async (id) => {
 
     return existing;
 }
+
+export const getBoothsCount = async () => {
+    return await mongoose.connection.db.collection("booths").countDocuments();
+}

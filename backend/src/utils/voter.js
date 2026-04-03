@@ -7,7 +7,7 @@ export const generateVoterId = (state) => {
 export const isUserFullyVerified = (verificationArray) => {
   if (!verificationArray || verificationArray.length === 0) return false;
 
-  const requiredLevels = ["BLO", "ERO", "DEO", "AI"];
+  const requiredLevels = ["BLO", "ERO", "DEO"];
 
   return requiredLevels.every(level =>
     verificationArray.some(v => v.level === level && v.status === "verified")

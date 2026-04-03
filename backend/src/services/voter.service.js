@@ -1,5 +1,6 @@
 import { User } from "../models/user.model.js";
 import { Voter } from "../models/voter.model.js";
+import { MobilityBooths } from "../models/mobility_booths.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { generateVoterId, isUserFullyVerified } from "../utils/voter.js";
 
@@ -84,3 +85,67 @@ export const getAllVotersService = async (page = 1, limit = 10, filter = {}) => 
         }
     };
 };
+
+export const checkVoterAndUserViaAadharService = async (aadharNumber) => {
+    // check are user or voter exists with this aadhar number and tell where it exists
+    const user = await User.findOne({ aadharNumber });
+    const voter = await Voter.findOne({ aadharNumber });
+    
+    return { user, voter };
+}   
+
+export const getVotersByBoothIdService = async (boothId) => {
+    if (!boothId) {
+        throw new ApiError(400, "Please provide boothId");
+    }
+
+    let voters = await Voter.find({ mobilityBoothId: boothId }).select("-password");
+
+    if (voters.length === 0) {
+        voters = await Voter.find({ boothNumber: boothId }).select("-password");
+    }
+
+    return voters;
+};
+
+export const assignMobilityBoothService = async (voterId, boothId) => {
+    const voter = await Voter.findOne({ uniqueVoterId: voterId });
+    if (!voter) {
+        throw new ApiError(404, "Voter not found");
+    }
+
+    const mobilityBooth = await MobilityBooths.findOne({ boothId });
+
+    if (!mobilityBooth) {
+        throw new ApiError(404, "Mobility booth not found");
+    }
+
+    voter.mobilityBoothId = boothId;
+    voter.isVerifiedMobilityBoothId = false;
+
+    await voter.save();
+
+    return voter;
+};
+
+export const verifyMobilityBoothService = async (voterId, isVerified) => {
+    const voter = await Voter.findById(voterId);
+
+    if (!voter) {
+        throw new ApiError(404, "Voter not found");
+    }
+
+    voter.isVerifiedMobilityBoothId = isVerified;
+    await voter.save();
+
+    return voter;
+};
+
+export const getMobilityBoothRequestsService = async () => {
+    const voters = await Voter.find({
+        mobilityBoothId: { $ne: null },
+        isVerifiedMobilityBoothId: false
+    }).select("-password");
+
+    return voters;
+};   
