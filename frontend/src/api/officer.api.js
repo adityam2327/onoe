@@ -62,3 +62,12 @@ export const getCEOStats = async () => {
         throw new Error(error.response?.data?.message || "Failed to fetch CEO stats");
     }
 };
+
+export const getDEOStats = async () => {
+    try {
+        const response = await api.get("/dashboard/deo-stats");
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || "Failed to fetch DEO stats");
+    }
+};

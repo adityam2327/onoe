@@ -45,3 +45,29 @@ export const getCEODashboardStats = async (state) => {
         booths: boothsCount
     };
 };
+
+export const getDEODashboardStats = async (district, state) => {
+    const [erosCount, blosCount, votersCount, boothsCount, assemblies] = await Promise.all([
+        mongoose.connection.db.collection("officers").countDocuments({ 
+            role: "ERO", 
+            "postingAddress.state": state,
+            "postingAddress.district": district 
+        }),
+        mongoose.connection.db.collection("officers").countDocuments({ 
+            role: "BLO", 
+            "postingAddress.state": state,
+            "postingAddress.district": district 
+        }),
+        mongoose.connection.db.collection("voters").countDocuments({ state, district }),
+        mongoose.connection.db.collection("booths").countDocuments({ state, district }),
+        mongoose.connection.db.collection("voters").distinct("assembley", { state, district })
+    ]);
+
+    return {
+        voters: votersCount,
+        eros: erosCount,
+        blos: blosCount,
+        booths: boothsCount,
+        assemblies: assemblies.length
+    };
+};
