@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: ["https://onoe-pi.vercel.app", "http://localhost:5173"],
   credentials: true,
 };
 

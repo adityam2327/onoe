@@ -115,12 +115,12 @@ export const createUserService = async (userData) => {
     }
 
     // check if parent aadhar number exists in voters collection
-    // if (userData?.relative?.aadharNumber) {
-    //     const relativeVoter = await Voter.findOne({ aadharNumber: userData.relative.aadharNumber });
-    //     if (!relativeVoter) {
-    //         throw new ApiError(400, "Relative with given Aadhar number does not exist in voters database");
-    //     }
-    // }
+    if (userData?.relative?.aadharNumber) {
+        const relativeVoter = await Voter.findOne({ aadharNumber: userData.relative.aadharNumber });
+        if (!relativeVoter) {
+            throw new ApiError(400, "Relative with given Aadhar number does not exist in voters database");
+        }
+    }
 
     const user = await User.create({ ...userData, referenceId, verification });
 
