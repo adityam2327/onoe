@@ -5,7 +5,7 @@ import { authenticateOfficer } from "../middlewares/officerAuth.js";
 const router = express.Router();
 
 router.post("/login", loginOfficer);
-router.post("/create", authenticateOfficer, createOfficer);
+router.post("/create",authenticateOfficer, createOfficer);
 router.get("/me", authenticateOfficer, getCurrentOfficer);
 router.get("/my-officers", authenticateOfficer, getMyOfficers);
 router.get("/role/:role", authenticateOfficer, getOfficersByRole);

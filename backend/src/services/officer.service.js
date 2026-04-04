@@ -24,8 +24,17 @@ export const createOfficerService = async (currentOfficerData, newOfficerData) =
     }
 
     const officerData = {
-        ...otherData,
-        role: allowedRole
+        name: otherData.name,
+        email: otherData.email,
+        password: otherData.password,
+        phoneNumber: otherData.phoneNumber,
+        role: allowedRole,
+        postingAddress: {
+            state: otherData.state || "",
+            district: otherData.district || "",
+            assembley: otherData.assembly || "",
+            consituency: otherData.constituency || ""
+        }
     };
 
     const officer = await Officer.create(officerData);
