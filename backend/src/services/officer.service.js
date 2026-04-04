@@ -17,7 +17,7 @@ export const createOfficerService = async (currentOfficerData, newOfficerData) =
         throw new ApiError(403, "You don't have permission to create officers");
     }
 
-    const { role: newRole, ...otherData } = newOfficerData;
+    const { role: newRole, state, district, assembly, constituency, ...otherData } = newOfficerData;
 
     if (newRole && newRole !== allowedRole) {
         throw new ApiError(400, `You can only create ${allowedRole} officers`);
@@ -25,7 +25,13 @@ export const createOfficerService = async (currentOfficerData, newOfficerData) =
 
     const officerData = {
         ...otherData,
-        role: allowedRole
+        role: allowedRole,
+        postingAddress: {
+            state: state || "",
+            district: district || "",
+            assembley: assembly || "",
+            consituency: constituency || ""
+        }
     };
 
     const officer = await Officer.create(officerData);

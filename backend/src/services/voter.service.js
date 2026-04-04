@@ -3,6 +3,25 @@ import { Voter } from "../models/voter.model.js";
 import { MobilityBooths } from "../models/mobility_booths.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { generateVoterId, isUserFullyVerified } from "../utils/voter.js";
+import axios from "axios";
+import FormData from "form-data";
+
+const performAsyncVoterVerification = async (imageUrl, aadharNumber) => {
+    try {
+        const formData = new FormData();
+        if (imageUrl) {
+            const imageResponse = await axios.get(imageUrl, { responseType: "arraybuffer" });
+            formData.append("file", Buffer.from(imageResponse.data), "image.jpg");
+        }
+        formData.append("name", aadharNumber);
+
+        await axios.post(`${process.env.AI_VERIFICATION_API_URL}/add-voter`, formData, {
+            headers: formData.getHeaders()
+        });
+    } catch (error) {
+        console.error("Voter AI verification failed:", error.message);
+    }
+};
 
 export const createVoterService = async (aadharNumber) => {
     const user = await User.findOne({ aadharNumber });
@@ -43,6 +62,8 @@ export const createVoterService = async (aadharNumber) => {
     if (!voter) {
         throw new ApiError(500, "Failed to create voter");
     }
+
+    // performAsyncVoterVerification(user.imageUrl, user.aadharNumber);
 
     return voter;
 };

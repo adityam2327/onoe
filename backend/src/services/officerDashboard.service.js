@@ -53,66 +53,157 @@ export const migrateUsersVerification = async () => {
 
 export const getPendingUsersForBLO = async (officer) => {
     await migrateUsersVerification();
-    const addressFilter = buildAddressFilter(officer);
+    // const addressFilter = buildAddressFilter(officer);
     
+    // const users = await User.find({
+    //     ...addressFilter
+    // }).lean();
+
+    // const filteredUsers = users.filter(user => {
+    //     const verification = user.verification || [];
+    //     const bloVerification = verification.find(v => v.level === "BLO");
+    //     const hasRejected = verification.some(v => v.level === "BLO" && v.status === "rejected");
+    //     return bloVerification && bloVerification.status === "pending" && !hasRejected;
+    // });
+
+    // return filteredUsers;
+
     const users = await User.find({
-        ...addressFilter
+        "verification": {
+            $elemMatch: {
+                level: "BLO",
+                status: "pending"
+            }
+        },
+        // ...addressFilter
     }).lean();
 
-    const filteredUsers = users.filter(user => {
-        const verification = user.verification || [];
-        const bloVerification = verification.find(v => v.level === "BLO");
-        const hasRejected = verification.some(v => v.level === "BLO" && v.status === "rejected");
-        return bloVerification && bloVerification.status === "pending" && !hasRejected;
-    });
-
-    return filteredUsers;
+    return users;
 };
 
-export const getPendingUsersForERO = async (officer) => {
-    await migrateUsersVerification();
-    const addressFilter = buildAddressFilter(officer);
+// export const getPendingUsersForERO = async (officer) => {
+//     await migrateUsersVerification();
+//     // const addressFilter = buildAddressFilter(officer);
     
-    const users = await User.find({
-        ...addressFilter
-    }).lean();
+//     // const users = await User.find({
+//     //     ...addressFilter
+//     // }).lean();
 
-    const filteredUsers = users.filter(user => {
-        const verification = user.verification || [];
-        const bloVerification = verification.find(v => v.level === "BLO");
-        const eroVerification = verification.find(v => v.level === "ERO");
-        const hasRejected = verification.some(v => v.level === "ERO" && v.status === "rejected");
+//     // const filteredUsers = users.filter(user => {
+//     //     const verification = user.verification || [];
+//     //     const bloVerification = verification.find(v => v.level === "BLO");
+//     //     const eroVerification = verification.find(v => v.level === "ERO");
+//     //     const hasRejected = verification.some(v => v.level === "ERO" && v.status === "rejected");
         
-        return bloVerification?.status === "verified" && 
-               eroVerification?.status === "pending" &&
-               !hasRejected;
-    });
+//     //     return bloVerification?.status === "verified" && 
+//     //            eroVerification?.status === "pending" &&
+//     //            !hasRejected;
+//     // });
 
-    return filteredUsers;
+//     // return filteredUsers;
+
+//     const users = await User.find({
+//         "verification": {
+//             $elemMatch: {
+//                 level: "ERO",
+//                 status: "pending"
+//             },
+//             $elemMatch: {
+//                 level: "BLO",
+//                 status: "verified"
+//             }
+//         },
+//         // ...addressFilter
+//     }).lean();
+
+//     return users;
+// };
+
+// export const getPendingUsersForDEO = async (officer) => {
+//     await migrateUsersVerification();
+//     // const addressFilter = buildAddressFilter(officer);
+    
+//     // const users = await User.find({
+//     //     ...addressFilter
+//     // }).lean();
+
+//     // const filteredUsers = users.filter(user => {
+//     //     const verification = user.verification || [];
+//     //     const bloVerification = verification.find(v => v.level === "BLO");
+//     //     const eroVerification = verification.find(v => v.level === "ERO");
+//     //     const deoVerification = verification.find(v => v.level === "DEO");
+//     //     const hasRejected = verification.some(v => v.level === "DEO" && v.status === "rejected");
+        
+//     //     return bloVerification?.status === "verified" && 
+//     //            eroVerification?.status === "verified" && 
+//     //            deoVerification?.status === "pending" &&
+//     //            !hasRejected;
+//     // });
+
+//     // return filteredUsers;
+
+//     const users = await User.find({
+//         "verification": {
+//             $elemMatch: {
+//                 level: "DEO",
+//                 status: "pending"
+//             },
+//             $elemMatch: {
+//                 level: "BLO",
+//                 status: "verified"
+//             },
+//             $elemMatch: {
+//                 level: "ERO",
+//                 status: "verified"
+//             }
+//         },
+//         // ...addressFilter
+//     }).lean();
+
+//     return users;
+// };
+
+export const getPendingUsersForERO = async () => {
+    await migrateUsersVerification();
+
+    return await User.find({
+        verification: {
+            $all: [
+                { $elemMatch: { level: "BLO", status: "verified" } },
+                { $elemMatch: { level: "ERO", status: "pending" } }
+            ]
+        }
+    }).lean();
 };
 
-export const getPendingUsersForDEO = async (officer) => {
+export const getPendingUsersForDEO = async () => {
     await migrateUsersVerification();
-    const addressFilter = buildAddressFilter(officer);
-    
+
     const users = await User.find({
-        ...addressFilter
+        $and: [
+            {
+                verification: {
+                    $all: [
+                        { $elemMatch: { level: "BLO", status: "verified" } },
+                        { $elemMatch: { level: "ERO", status: "verified" } },
+                        { $elemMatch: { level: "DEO", status: "pending" } }
+                    ]
+                }
+            },
+            {
+                verification: {
+                    $not: {
+                        $elemMatch: {
+                            level: "DEO",
+                            status: "rejected"
+                        }
+                    }
+                }
+            }
+        ]
     }).lean();
 
-    const filteredUsers = users.filter(user => {
-        const verification = user.verification || [];
-        const bloVerification = verification.find(v => v.level === "BLO");
-        const eroVerification = verification.find(v => v.level === "ERO");
-        const deoVerification = verification.find(v => v.level === "DEO");
-        const hasRejected = verification.some(v => v.level === "DEO" && v.status === "rejected");
-        
-        return bloVerification?.status === "verified" && 
-               eroVerification?.status === "verified" && 
-               deoVerification?.status === "pending" &&
-               !hasRejected;
-    });
-
-    return filteredUsers;
+    return users;
 };
 
 export const verifyUserByBLO = async (userId, remarks) => {
