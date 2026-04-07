@@ -5,50 +5,88 @@ import axios from "axios";
 import FormData from "form-data";
 import { Voter } from "../models/voter.model.js";
 
-const performAsyncVerification = async (userId, imageUrl) => {
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const performAsyncVerification = async (userId, imageUrl, attempt = 1) => {
+    const MAX_RETRIES = 3; // 1 initial + 2 retries
+
     try {
-        let formData = new FormData();
-        if (imageUrl) {
-            const imageResponse = await axios.get(imageUrl, { responseType: "arraybuffer" });
-            formData.append("file", Buffer.from(imageResponse.data), "image.jpg");
+        console.log(`AI Verification started (Attempt ${attempt}) for:`, userId);
+
+        if (!imageUrl) {
+            throw new Error("Image URL missing");
         }
 
-        const response = await axios.post(`${process.env.AI_VERIFICATION_API_URL}/verify-user`, formData, {
-            headers: formData.getHeaders()
+        let formData = new FormData();
+
+        const imageResponse = await axios.get(imageUrl, {
+            responseType: "arraybuffer",
+            timeout: 300000 // image fetch timeout (5 mins)
         });
+
+        formData.append("file", Buffer.from(imageResponse.data), "image.jpg");
+
+        const response = await axios.post(
+            `${process.env.AI_VERIFICATION_API_URL}/verify-user`,
+            formData,
+            {
+                headers: formData.getHeaders(),
+                timeout: 300000 // ✅ 5 minutes
+            }
+        );
+
+        console.log("AI Response:", response.data);
 
         const updateData = response.data?.exists
             ? {
-                $set: {
-                    "verification.$[elem].status": "rejected",
-                    "verification.$[elem].remarks": "A user with similar facial features already exists",
-                    "verification.$[elem].verifiedAt": new Date()
-                }
-            }
+                  $set: {
+                      "verification.$[elem].status": "rejected",
+                      "verification.$[elem].remarks":
+                          "A user with similar facial features already exists",
+                      "verification.$[elem].verifiedAt": new Date()
+                  }
+              }
             : {
-                $set: {
-                    "verification.$[elem].status": "verified",
-                    "verification.$[elem].remarks": "Auto-verified by AI system - No similar facial features found",
-                    "verification.$[elem].verifiedAt": new Date()
-                }
-            };
+                  $set: {
+                      "verification.$[elem].status": "verified",
+                      "verification.$[elem].remarks":
+                          "Auto-verified by AI system - No similar facial features found",
+                      "verification.$[elem].verifiedAt": new Date()
+                  }
+              };
 
-        await User.findOneAndUpdate(
-            { _id: userId, "verification.level": "AI" },
+        await User.updateOne(
+            { _id: userId },
             updateData,
-            { arrayFilters: [{ elem: { level: "AI" } }] }
+            { arrayFilters: [{ "elem.level": "AI" }] }
         );
+
+        console.log("✅ AI verification completed for:", userId);
+
     } catch (error) {
-        await User.findOneAndUpdate(
-            { _id: userId, "verification.level": "AI" },
+        console.error(`❌ Attempt ${attempt} failed:`, error.message);
+
+        if (attempt < MAX_RETRIES) {
+            console.log(`🔁 Retrying... (${attempt + 1}/${MAX_RETRIES})`);
+
+            await sleep(5000); // wait 5 sec before retry
+
+            return performAsyncVerification(userId, imageUrl, attempt + 1);
+        }
+
+        console.error("🚫 All retries failed for:", userId);
+
+        await User.updateOne(
+            { _id: userId },
             {
                 $set: {
                     "verification.$[elem].status": "rejected",
-                    "verification.$[elem].remarks": "AI verification failed",
+                    "verification.$[elem].remarks":
+                        "AI verification failed after multiple attempts",
                     "verification.$[elem].verifiedAt": new Date()
                 }
             },
-            { arrayFilters: [{ elem: { level: "AI" } }] }
+            { arrayFilters: [{ "elem.level": "AI" }] }
         );
     }
 };
@@ -77,12 +115,12 @@ export const createUserService = async (userData) => {
     }
 
     // check if parent aadhar number exists in voters collection
-    // if (userData?.relative?.aadharNumber) {
-    //     const relativeVoter = await Voter.findOne({ aadharNumber: userData.relative.aadharNumber });
-    //     if (!relativeVoter) {
-    //         throw new ApiError(400, "Relative with given Aadhar number does not exist in voters database");
-    //     }
-    // }
+    if (userData?.relative?.aadharNumber) {
+        const relativeVoter = await Voter.findOne({ aadharNumber: userData.relative.aadharNumber });
+        if (!relativeVoter) {
+            throw new ApiError(400, "Relative with given Aadhar number does not exist in voters database");
+        }
+    }
 
     const user = await User.create({ ...userData, referenceId, verification });
 
@@ -90,7 +128,10 @@ export const createUserService = async (userData) => {
         throw new ApiError(500, "Failed to create user");
     }
 
-    performAsyncVerification(user._id, userData.imageUrl);
+    setImmediate(() => {
+        performAsyncVerification(user._id, userData.imageUrl)
+            .catch(err => console.error("Background job crashed:", err));
+    });
 
     return user;
 };

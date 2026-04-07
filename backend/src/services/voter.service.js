@@ -86,14 +86,17 @@ export const loginVoterService = async (uniqueVoterId, password) => {
 
 export const getAllVotersService = async (page = 1, limit = 10, filter = {}) => {
     const skip = (page - 1) * limit;
+    
+    const baseFilter = { isDeleted: false };
+    const finalFilter = { ...baseFilter, ...filter };
 
     const [voters, total] = await Promise.all([
-        Voter.find(filter)
+        Voter.find(finalFilter)
             .select("-password")
             .skip(skip)
             .limit(limit)
             .lean(),
-        Voter.countDocuments(filter)
+        Voter.countDocuments(finalFilter)
     ]);
 
     return {
@@ -103,6 +106,38 @@ export const getAllVotersService = async (page = 1, limit = 10, filter = {}) => 
             limit,
             total,
             totalPages: Math.ceil(total / limit)
+        }
+    };
+};
+
+export const getVotersByStateService = async (state, page = 1, limit = 10) => {
+    const skip = (page - 1) * limit;
+
+    const filter = { state, isDeleted: false };
+
+    const [voters, total, districts, assemblies] = await Promise.all([
+        Voter.find(filter)
+            .select("-password")
+            .skip(skip)
+            .limit(limit)
+            .lean(),
+        Voter.countDocuments(filter),
+        Voter.distinct("district", { state }),
+        Voter.distinct("assembley", { state })
+    ]);
+
+    return {
+        voters,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit)
+        },
+        stats: {
+            totalVoters: total,
+            totalDistricts: districts.length,
+            totalAssemblies: assemblies.length
         }
     };
 };
@@ -120,10 +155,10 @@ export const getVotersByBoothIdService = async (boothId) => {
         throw new ApiError(400, "Please provide boothId");
     }
 
-    let voters = await Voter.find({ mobilityBoothId: boothId }).select("-password");
+    let voters = await Voter.find({ mobilityBoothId: boothId, isDeleted: false }).select("-password");
 
     if (voters.length === 0) {
-        voters = await Voter.find({ boothNumber: boothId }).select("-password");
+        voters = await Voter.find({ boothNumber: boothId, isDeleted: false }).select("-password");
     }
 
     return voters;
@@ -165,8 +200,83 @@ export const verifyMobilityBoothService = async (voterId, isVerified) => {
 export const getMobilityBoothRequestsService = async () => {
     const voters = await Voter.find({
         mobilityBoothId: { $ne: null },
-        isVerifiedMobilityBoothId: false
+        isVerifiedMobilityBoothId: false,
+        isDeleted: false
     }).select("-password");
+
+    return voters;
+};   
+
+export const markVoterAsDeletedService = async (voterId, reason, officerName) => {
+    const voter = await Voter.findById(voterId);
+    
+    if (!voter) {
+        throw new ApiError(404, "Voter not found");
+    }
+    
+    if (voter.isDeleted) {
+        throw new ApiError(400, "Voter is already marked as deleted");
+    }
+    
+    voter.isDeleted = true;
+    voter.deletedAt = new Date();
+    voter.deletionReason = reason;
+    voter.deletedBy = officerName;
+    
+    await voter.save();
+    
+    return voter;
+};
+
+export const getDeletedVotersService = async (page = 1, limit = 10) => {
+    const skip = (page - 1) * limit;
+
+    const [voters, total] = await Promise.all([
+        Voter.find({ isDeleted: true })
+            .select("-password")
+            .skip(skip)
+            .limit(limit)
+            .lean(),
+        Voter.countDocuments({ isDeleted: true })
+    ]);
+
+    return {
+        voters,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit)
+        }
+    };
+};   
+
+export const searchVotersService = async (searchParams) => {
+    const { phoneNumber, aadharNumber, uniqueVoterId, name } = searchParams;
+    
+    const filter = { isDeleted: false };
+    
+    if (phoneNumber) {
+        filter.phoneNumber = phoneNumber;
+    }
+    if (aadharNumber) {
+        filter.aadharNumber = aadharNumber;
+    }
+    if (uniqueVoterId) {
+        filter.uniqueVoterId = uniqueVoterId;
+    }
+    if (name) {
+        filter.$or = [
+            { firstName: { $regex: name, $options: "i" } },
+            { lastName: { $regex: name, $options: "i" } }
+        ];
+    }
+
+    const voters = await Voter.find(filter)
+        .select("-password")
+        .lean()
+        .limit(20);
+
 
     return voters;
 };   

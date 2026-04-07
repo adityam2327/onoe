@@ -1,15 +1,15 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, UserPlus, Building2, MapPin, BarChart3, FileText, Vote } from "lucide-react";
+import { Users, UserPlus, Building2, MapPin, BarChart3, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getCurrentOfficer, getMyOfficers } from "@/api/officer.api";
+import { getCurrentOfficer, getEROStats } from "@/api/officer.api";
 import { Link } from "react-router-dom";
 
 export const ERODashboard = () => {
     const [officer, setOfficer] = useState(null);
     const [stats, setStats] = useState({
         blos: 0,
-        totalOfficers: 0
+        booths: 0
     });
     const [loading, setLoading] = useState(true);
 
@@ -17,15 +17,21 @@ export const ERODashboard = () => {
         const fetchData = async () => {
             try {
                 const officerRes = await getCurrentOfficer();
-                setOfficer(officerRes.data);
+                const officerData = officerRes.data;
+                setOfficer(officerData);
                 
-                const blosRes = await getMyOfficers();
+                const statsRes = await getEROStats();
+                const responseData = statsRes.data?.data || statsRes.data || {};
                 setStats({
-                    blos: blosRes.data.length,
-                    totalOfficers: blosRes.data.length
+                    blos: responseData.blos || 0,
+                    booths: responseData.booths || 0
                 });
             } catch (error) {
                 console.error("Failed to fetch data:", error);
+                setStats({
+                    blos: 0,
+                    booths: 0
+                });
             } finally {
                 setLoading(false);
             }
@@ -46,19 +52,25 @@ export const ERODashboard = () => {
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold text-[#000080]">ERO Dashboard</h2>
-                    <p className="text-gray-500">Electoral Registration Officer</p>
+                    <p className="text-gray-500">
+                        {officer?.postingAddress?.assembley || "Assembly"} - {officer?.postingAddress?.district || "District"}
+                    </p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[#138808]"></div>
-                    <span className="text-sm text-gray-600">Assembly Active</span>
-                </div>
+                <Button 
+                    variant="outline" 
+                    onClick={() => window.location.reload()}
+                    className="border-[#000080] text-[#000080]"
+                >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Refresh
+                </Button>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="border-l-4 border-l-[#FF9933]">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <Card className="border-l-4 border-l-[#138808]">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-gray-600">Total BLOs</CardTitle>
-                        <Building2 className="h-4 w-4 text-[#FF9933]" />
+                        <Building2 className="h-4 w-4 text-[#138808]" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-[#000080]">{stats.blos}</div>
@@ -66,41 +78,19 @@ export const ERODashboard = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-[#138808]">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600">Total Officers</CardTitle>
-                        <Users className="h-4 w-4 text-[#138808]" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-[#000080]">{stats.totalOfficers}</div>
-                        <p className="text-xs text-gray-500">Booth level officers</p>
-                    </CardContent>
-                </Card>
-
                 <Card className="border-l-4 border-l-[#000080]">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600">Booths</CardTitle>
-                        <Vote className="h-4 w-4 text-[#000080]" />
+                        <CardTitle className="text-sm font-medium text-gray-600">Total Booths</CardTitle>
+                        <MapPin className="h-4 w-4 text-[#000080]" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-[#000080]">{stats.blos}</div>
+                        <div className="text-2xl font-bold text-[#000080]">{stats.booths}</div>
                         <p className="text-xs text-gray-500">Polling stations</p>
-                    </CardContent>
-                </Card>
-
-                <Card className="border-l-4 border-l-[#FF9933]">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600">Reports</CardTitle>
-                        <FileText className="h-4 w-4 text-[#FF9933]" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-[#000080]">0</div>
-                        <p className="text-xs text-gray-500">Pending reports</p>
                     </CardContent>
                 </Card>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <Card className="bg-gradient-to-br from-[#FF9933] to-[#138808] text-white">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -112,11 +102,8 @@ export const ERODashboard = () => {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-white/80 mb-4">
-                            Create and assign BLOs to manage polling station-level operations.
-                        </p>
                         <Link to="/dashboard/create-officer">
-                            <Button className="bg-white text-[#FF9933] hover:bg-white/90 border-0">
+                            <Button className="bg-white text-[#FF9933] hover:bg-white/90 border-0 w-full">
                                 <UserPlus className="w-4 h-4 mr-2" />
                                 Create New BLO
                             </Button>
@@ -124,28 +111,25 @@ export const ERODashboard = () => {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-gradient-to-br from-[#138808] to-[#000080] text-white col-span-2">
                     <CardHeader>
-                        <CardTitle className="text-[#000080] flex items-center gap-2">
-                            <BarChart3 className="w-5 h-5 text-[#FF9933]" />
-                            Assembly Overview
+                        <CardTitle className="flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5" />
+                            Quick Actions
                         </CardTitle>
-                        <CardDescription>
-                            Quick access to assembly electoral data
-                        </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <span className="text-sm text-gray-600">Voter Registration</span>
-                            <span className="text-sm font-semibold text-[#138808]">Active</span>
-                        </div>
-                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <span className="text-sm text-gray-600">Booth Management</span>
-                            <span className="text-sm font-semibold text-[#138808]">Active</span>
-                        </div>
-                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <span className="text-sm text-gray-600">Electoral Rolls</span>
-                            <span className="text-sm font-semibold text-[#138808]">Active</span>
+                        <div className="grid grid-cols-2 gap-2">
+                            <Link to="/dashboard/verify-voters">
+                                <Button variant="outline" className="w-full border-white text-white hover:bg-white/20 hover:text-white bg-transparent">
+                                    Verify Voters
+                                </Button>
+                            </Link>
+                            <Link to="/dashboard/officers">
+                                <Button variant="outline" className="w-full border-white text-white hover:bg-white/20 hover:text-white bg-transparent">
+                                    Manage Officers
+                                </Button>
+                            </Link>
                         </div>
                     </CardContent>
                 </Card>
@@ -158,22 +142,6 @@ export const ERODashboard = () => {
                         You are managing assembly-level electoral operations. Create and oversee booth-level officers.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-[#FF9933]"></div>
-                            <span className="text-sm text-gray-600">Saffron</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-white border border-gray-300"></div>
-                            <span className="text-sm text-gray-600">White</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-[#138808]"></div>
-                            <span className="text-sm text-gray-600">Green</span>
-                        </div>
-                    </div>
-                </CardContent>
             </Card>
         </div>
     );

@@ -162,6 +162,22 @@ const voterSchema = new Schema(
         isVerifiedMobilityBoothId: {
             type: Boolean,
             default: false
+        },
+        isDeleted: {
+            type: Boolean,
+            default: false
+        },
+        deletedAt: {
+            type: Date,
+            default: null
+        },
+        deletionReason: {
+            type: String,
+            default: null
+        },
+        deletedBy: {
+            type: String,
+            default: null
         }
     }
 );

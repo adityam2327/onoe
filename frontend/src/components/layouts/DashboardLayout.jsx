@@ -133,19 +133,36 @@ export const DashboardLayout = () => {
                                 </Link>
                             </li>
                         )}
-                        <li>
-                            <Link
-                                to="/dashboard/officers"
-                                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
-                                    location.pathname === "/dashboard/officers"
-                                        ? "bg-white/20 text-white"
-                                        : "text-white/80 hover:bg-white/10 hover:text-white"
-                                }`}
-                            >
-                                <Users className="w-5 h-5" />
-                                My Officers
-                            </Link>
-                        </li>
+                        {officer.role === "BLO" && (
+                            <li>
+                                <Link
+                                    to="/dashboard/manage-voters"
+                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
+                                        location.pathname === "/dashboard/manage-voters"
+                                            ? "bg-white/20 text-white"
+                                            : "text-white/80 hover:bg-white/10 hover:text-white"
+                                    }`}
+                                >
+                                    <UserCheck className="w-5 h-5" />
+                                    Manage Voters
+                                </Link>
+                            </li>
+                        )}
+                        {(officer.role === "ECI HQ" || officer.role === "CEO" || officer.role === "DEO" || officer.role === "ERO") && (
+                            <li>
+                                <Link
+                                    to="/dashboard/officers"
+                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
+                                        location.pathname === "/dashboard/officers"
+                                            ? "bg-white/20 text-white"
+                                            : "text-white/80 hover:bg-white/10 hover:text-white"
+                                    }`}
+                                >
+                                    <Users className="w-5 h-5" />
+                                    My Officers
+                                </Link>
+                            </li>
+                        )}
                         {config.createRole && (
                             <li>
                                 <Link
@@ -173,6 +190,21 @@ export const DashboardLayout = () => {
                                 >
                                     <UserCheck className="w-5 h-5" />
                                     All Voters
+                                </Link>
+                            </li>
+                        )}
+                        {officer.role === "CEO" && (
+                            <li>
+                                <Link
+                                    to="/dashboard/voters"
+                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
+                                        location.pathname === "/dashboard/voters"
+                                            ? "bg-white/20 text-white"
+                                            : "text-white/80 hover:bg-white/10 hover:text-white"
+                                    }`}
+                                >
+                                    <UserCheck className="w-5 h-5" />
+                                    State Voters
                                 </Link>
                             </li>
                         )}

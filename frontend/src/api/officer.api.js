@@ -53,3 +53,39 @@ export const getECIStats = async () => {
         throw new Error(error.response?.data?.message || "Failed to fetch stats");
     }
 };
+
+export const getCEOStats = async () => {
+    try {
+        const response = await api.get("/dashboard/ceo-stats");
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || "Failed to fetch CEO stats");
+    }
+};
+
+export const getDEOStats = async () => {
+    try {
+        const response = await api.get("/dashboard/deo-stats");
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || "Failed to fetch DEO stats");
+    }
+};
+
+export const getEROStats = async () => {
+    try {
+        const response = await api.get("/dashboard/ero-stats");
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || "Failed to fetch ERO stats");
+    }
+};
+
+export const getBLOStats = async () => {
+    try {
+        const response = await api.get("/dashboard/blo-stats");
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || "Failed to fetch BLO stats");
+    }
+};

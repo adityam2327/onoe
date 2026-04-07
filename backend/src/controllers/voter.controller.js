@@ -1,6 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { loginVoterService, getAllVotersService, checkVoterAndUserViaAadharService, getVotersByBoothIdService, assignMobilityBoothService, verifyMobilityBoothService, getMobilityBoothRequestsService } from "../services/voter.service.js";
+import { loginVoterService, getAllVotersService, checkVoterAndUserViaAadharService, getVotersByBoothIdService, assignMobilityBoothService, verifyMobilityBoothService, getMobilityBoothRequestsService, getVotersByStateService, markVoterAsDeletedService, getDeletedVotersService, searchVotersService } from "../services/voter.service.js";
 
 export const loginVoter = asyncHandler(async (req, res) => {
     const { uniqueVoterId, password } = req.body;
@@ -67,4 +67,49 @@ export const getMobilityBoothRequests = asyncHandler(async (req, res) => {
     const voters = await getMobilityBoothRequestsService();
 
     return res.status(200).json(new ApiResponse(200, "Mobility booth requests fetched successfully", voters));
+});
+
+export const getVotersByState = asyncHandler(async (req, res) => {
+    const { state } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    if (!state) {
+        return res.status(400).json(new ApiResponse(400, "State is required"));
+    }
+
+    const result = await getVotersByStateService(state, page, limit);
+
+    return res.status(200).json(new ApiResponse(200, "Voters fetched successfully", result));
+});
+
+export const markVoterAsDeleted = asyncHandler(async (req, res) => {
+    const { voterId, reason } = req.body;
+    const officer = req.officer;
+    const officerName = officer ? `${officer.name} (${officer.role})` : "Unknown";
+
+    const voter = await markVoterAsDeletedService(voterId, reason, officerName);
+
+    return res.status(200).json(new ApiResponse(200, "Voter marked as deleted successfully", voter));
+});
+
+export const getDeletedVoters = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const result = await getDeletedVotersService(page, limit);
+
+    return res.status(200).json(new ApiResponse(200, "Deleted voters fetched successfully", result));
+});
+
+export const searchVoters = asyncHandler(async (req, res) => {
+    const { phoneNumber, aadharNumber, uniqueVoterId, name } = req.query;
+    
+    if (!phoneNumber && !aadharNumber && !uniqueVoterId && !name) {
+        return res.status(400).json(new ApiResponse(400, "At least one search parameter is required"));
+    }
+
+    const voters = await searchVotersService({ phoneNumber, aadharNumber, uniqueVoterId, name });
+
+    return res.status(200).json(new ApiResponse(200, "Voters fetched successfully", voters));
 });

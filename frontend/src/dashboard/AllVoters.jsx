@@ -5,12 +5,15 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
-import { getAllVoters } from "@/api/voter.api";
+import { getAllVoters, getVotersByState } from "@/api/voter.api";
+import { getCurrentOfficer } from "@/api/officer.api";
 import { Users, Search, RefreshCw, ChevronLeft, ChevronRight, User, X, Phone, Mail, MapPin, Calendar, Building, Hash, IdCard } from "lucide-react";
 
 export const AllVoters = () => {
     const [voters, setVoters] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [officer, setOfficer] = useState(null);
+    const [stats, setStats] = useState(null);
     const [pagination, setPagination] = useState({
         page: 1,
         limit: 10,
@@ -28,22 +31,52 @@ export const AllVoters = () => {
     const fetchVoters = async (page = 1) => {
         setLoading(true);
         try {
-            const params = { page, limit: pagination.limit, ...filters };
-            Object.keys(params).forEach(key => !params[key] && delete params[key]);
-            
-            const response = await getAllVoters(params);
-            setVoters(response.data.voters);
-            setPagination(response.data.pagination);
+            let response;
+            if (officer?.role === "CEO") {
+                const state = officer.postingAddress?.state;
+                if (state) {
+                    response = await getVotersByState(state, page, pagination.limit);
+                    const responseData = response.data?.data || response.data || {};
+                    setStats(responseData.stats);
+                    setVoters(responseData.voters || []);
+                    setPagination(responseData.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 });
+                    setLoading(false);
+                    return;
+                }
+            } else {
+                const params = { page, limit: pagination.limit, ...filters };
+                Object.keys(params).forEach(key => !params[key] && delete params[key]);
+                response = await getAllVoters(params);
+            }
+            const responseData = response.data?.data || response.data || {};
+            setVoters(responseData.voters || []);
+            setPagination(responseData.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 });
         } catch (error) {
             console.error("Failed to fetch voters:", error);
+            setVoters([]);
+            setPagination({ page: 1, limit: 10, total: 0, totalPages: 0 });
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchVoters();
+        const init = async () => {
+            try {
+                const officerRes = await getCurrentOfficer();
+                setOfficer(officerRes.data);
+            } catch (error) {
+                console.error("Failed to fetch officer:", error);
+            }
+        };
+        init();
     }, []);
+
+    useEffect(() => {
+        if (officer) {
+            fetchVoters();
+        }
+    }, [officer]);
 
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= pagination.totalPages) {
@@ -68,9 +101,14 @@ export const AllVoters = () => {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-[#000080]">All Voters</h2>
+                    <h2 className="text-2xl font-bold text-[#000080]">
+                        {officer?.role === "CEO" ? "State Voters" : "All Voters"}
+                    </h2>
                     <p className="text-gray-500">
-                        View and manage registered voters
+                        {officer?.role === "CEO" 
+                            ? `Voters of ${officer.postingAddress?.state}`
+                            : "View and manage registered voters"
+                        }
                     </p>
                 </div>
                 <Button 
@@ -83,6 +121,36 @@ export const AllVoters = () => {
                 </Button>
             </div>
 
+            {stats && officer?.role === "CEO" && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card className="border-l-4 border-l-[#FF9933]">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-gray-600">Total Voters</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-[#000080]">{stats.totalVoters?.toLocaleString()}</div>
+                        </CardContent>
+                    </Card>
+                    <Card className="border-l-4 border-l-[#138808]">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-gray-600">Districts</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-[#000080]">{stats.totalDistricts}</div>
+                        </CardContent>
+                    </Card>
+                    <Card className="border-l-4 border-l-[#000080]">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-gray-600">Assemblies</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-[#000080]">{stats.totalAssemblies}</div>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+
+            {officer?.role !== "CEO" && (
             <Card>
                 <CardHeader>
                     <CardTitle className="text-[#000080] flex items-center gap-2">
@@ -151,6 +219,7 @@ export const AllVoters = () => {
                     </div>
                 </CardContent>
             </Card>
+            )}
 
             <Card>
                 <CardHeader>
